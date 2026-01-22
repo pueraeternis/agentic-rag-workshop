@@ -13,7 +13,7 @@
 *   **Мозг (Logic):** [LangGraph](https://langchain-ai.github.io/langgraph/) (Stateful Agent, Memory).
 *   **Знания (RAG):** [LlamaIndex](https://www.llamaindex.ai/) (Data Ingestion, Vector Store).
 *   **Мониторинг:** [Langfuse](https://langfuse.com/) (Self-hosted via Docker).
-*   **LLM & Embeddings:** [Ollama](https://ollama.com/) (Model: `qwen2.5:7b`, Embeddings: `nomic-embed-text`).
+*   **LLM & Embeddings:** [Ollama](https://ollama.com/) (Model: `qwen3:8b`, Embeddings: `nomic-embed-text`).
 *   **Инфраструктура:** Docker Compose (Ollama, Postgres, Clickhouse, Minio, Redis).
 *   **Package Manager:** `uv`.
 
