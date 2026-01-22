@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING
 
-# --- ЗАГРУЗКА ПЕРЕМЕННЫХ ОКРУЖЕНИЯ ---
 from dotenv import load_dotenv
 
 # Импорты LangChain
@@ -14,7 +13,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 
-# Наш RAG
+# RAG
 from rag_engine import get_rag_tool_function
 
 if TYPE_CHECKING:
@@ -88,8 +87,6 @@ def main():
         langfuse_handler = None
 
     # 2. Добавляем его в конфиг
-    # ИСПРАВЛЕНИЕ: Явно аннотируем тип списка как List[BaseCallbackHandler].
-    # Это удовлетворяет инвариантность списков (List[Parent] принимает Child).
     callbacks: list[BaseCallbackHandler] = [langfuse_handler] if langfuse_handler else []
 
     config: RunnableConfig = {
