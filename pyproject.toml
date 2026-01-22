@@ -4,4 +4,8 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "langchain-ollama>=1.0.1",
+    "llama-index-embeddings-ollama>=0.8.6",
+    "llama-index-llms-ollama>=0.9.1",
+]
