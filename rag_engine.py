@@ -11,7 +11,6 @@ from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
 
 # --- КОНФИГУРАЦИЯ ---
-# Используем Path для кросс-платформенной работы с путями
 PERSIST_DIR = Path("./index_store")
 DATA_DIR = Path("./data")
 
@@ -38,11 +37,9 @@ def get_index():
     Создает или загружает векторный индекс.
     Pattern: Checkpointer (Персистенция)
     """
-    # Refactor: os.path.exists -> Path.exists()
     if not PERSIST_DIR.exists():
         print(f"📂 Индекс не найден в {PERSIST_DIR}. Создаем новый...")
 
-        # LlamaIndex отлично принимает объекты Path
         documents = SimpleDirectoryReader(input_dir=DATA_DIR).load_data()
         print(f"📄 Загружено документов: {len(documents)}")
 
