@@ -98,9 +98,6 @@ def main():
 
             print("⏳ Агент думает...", end="", flush=True)
 
-            # --- ИСПРАВЛЕНИЕ ТУТ ---
-            # Явно указываем тип MessagesState для словаря inputs.
-            # Это успокаивает линтер, который иначе видит dict[str, list[Unknown]].
             inputs: MessagesState = {
                 "messages": [sys_msg, HumanMessage(content=user_input)],
             }
