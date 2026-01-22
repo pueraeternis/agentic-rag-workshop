@@ -1,9 +1,13 @@
 from typing import TYPE_CHECKING
 
+# --- ЗАГРУЗКА ПЕРЕМЕННЫХ ОКРУЖЕНИЯ ---
+from dotenv import load_dotenv
+
 # Импорты LangChain
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.tools import tool
 from langchain_ollama import ChatOllama
+from langfuse.langchain import CallbackHandler
 
 # Импорты LangGraph
 from langgraph.checkpoint.memory import MemorySaver
@@ -13,11 +17,12 @@ from langgraph.prebuilt import ToolNode, tools_condition
 # Наш RAG
 from rag_engine import get_rag_tool_function
 
-# Type Checking optimization
 if TYPE_CHECKING:
+    from langchain_core.callbacks import BaseCallbackHandler
     from langchain_core.runnables import RunnableConfig
 
 # --- НАСТРОЙКА ---
+load_dotenv()
 
 # 1. Инструмент
 rag_search_func = get_rag_tool_function()
@@ -47,32 +52,24 @@ llm_with_tools = llm.bind_tools(tools)
 memory = MemorySaver()
 
 
-# --- ПОСТРОЕНИЕ ГРАФА (Native LangGraph) ---
+# --- ГРАФ ---
 
 
 def call_model(state: MessagesState):
-    """Узел агента: вызывает LLM с текущей историей сообщений."""
+    """Узел агента"""
     messages = state["messages"]
     response = llm_with_tools.invoke(messages)
     return {"messages": [response]}
 
 
-# Инициализируем граф
 workflow = StateGraph(MessagesState)
-
-# Добавляем узлы
 workflow.add_node("agent", call_model)
 workflow.add_node("tools", ToolNode(tools))
 
-# Определяем ребра
 workflow.add_edge(START, "agent")
-workflow.add_conditional_edges(
-    "agent",
-    tools_condition,
-)
+workflow.add_conditional_edges("agent", tools_condition)
 workflow.add_edge("tools", "agent")
 
-# Компилируем
 app = workflow.compile(checkpointer=memory)
 
 
@@ -82,8 +79,23 @@ app = workflow.compile(checkpointer=memory)
 def main():
     print("🤖 Ассистент готов к работе! (Введите 'q' для выхода)")
 
-    # Forward Reference для типа
-    config: RunnableConfig = {"configurable": {"thread_id": "session_1"}}
+    # 1. Инициализируем хендлер
+    try:
+        langfuse_handler = CallbackHandler()
+        print("✅ Langfuse мониторинг подключен")
+    except Exception as e:
+        print(f"⚠️ Ошибка подключения Langfuse: {e}")
+        langfuse_handler = None
+
+    # 2. Добавляем его в конфиг
+    # ИСПРАВЛЕНИЕ: Явно аннотируем тип списка как List[BaseCallbackHandler].
+    # Это удовлетворяет инвариантность списков (List[Parent] принимает Child).
+    callbacks: list[BaseCallbackHandler] = [langfuse_handler] if langfuse_handler else []
+
+    config: RunnableConfig = {
+        "configurable": {"thread_id": "session_1"},
+        "callbacks": callbacks,
+    }
 
     sys_msg = SystemMessage(
         content="Ты — ассистент техподдержки. Ищи ответы в базе знаний через lookup_policy. Отвечай на русском.",

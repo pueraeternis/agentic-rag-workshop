@@ -59,17 +59,23 @@ def get_index():
 
 def get_rag_tool_function():
     """
-    Возвращает функцию поиска, которую можно скормить Агенту.
+    Возвращает функцию поиска, оптимизированную для скорости.
     """
     index = get_index()
-    # Создаем движок запросов (top_k=3 - берем 3 самых похожих куска)
-    query_engine = index.as_query_engine(similarity_top_k=3)
+
+    retriever = index.as_retriever(similarity_top_k=3)
 
     def search_knowledge_base(query: str) -> str:
         """Поиск информации в базе знаний технической поддержки."""
-        response = query_engine.query(query)
-        # Возвращаем текст ответа + источники (метаданные)
-        return str(response)
+        # 1. Получаем список узлов (Nodes)
+        nodes = retriever.retrieve(query)
+
+        # 2. Собираем текст из узлов вручную
+        context_str = "\n\n".join(
+            [f"--- Источник {i + 1} ---\n{node.get_content()}" for i, node in enumerate(nodes)],
+        )
+
+        return context_str
 
     return search_knowledge_base
 
