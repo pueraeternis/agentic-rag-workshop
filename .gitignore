@@ -1,6 +1,9 @@
 # Ollama data
 ollama_data
 
+# Index
+index_store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
